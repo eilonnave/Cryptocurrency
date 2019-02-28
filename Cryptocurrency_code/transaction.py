@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-from Crypto import Hash
-from Crypto import PublicKey
-from Crypto import Signature
+import Crypto
 
 
 class Transaction:
@@ -17,8 +15,9 @@ class Transaction:
         """
         returns a hash of the transaction's
         data
+        :returns: the transaction's hash
         """
-        pass
+        return Crypto.HashHash.SHA256.new(self.to_string()).hehexdigest()
 
     def to_string(self):
         """
@@ -29,3 +28,8 @@ class Transaction:
             self.recipient_address\
             + str(self.amount)
         return s
+
+
+if __name__ == "__main__":
+    t = Transaction('1', '1', 1)
+    print t.hash_transaction()

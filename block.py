@@ -16,6 +16,7 @@ class Block:
     def to_string(self):
         """
         the function converts the block to a string
+        :returns: the block's string
         """
         block_string = str(
             self.number)+str(
@@ -25,6 +26,8 @@ class Block:
     def hash(self):
         """
         the function hashes the block data
+        :returns: the hash value of the
+        block's properties
         """
         return hashlib.sha256(
             self.to_string().encode(
@@ -34,6 +37,7 @@ class Block:
         """
         update the block hash according to
         to the new nonce
+        :param nonce: the new nonce
         """
         self.nonce = nonce
         self.hash_code = self.hash()

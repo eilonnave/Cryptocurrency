@@ -12,6 +12,7 @@ class Block:
         self.data = data
         self.prev = prev
         self.hash_code = self.hash()
+        self.transactions = []
 
     def to_string(self):
         """
@@ -41,6 +42,14 @@ class Block:
         """
         self.nonce = nonce
         self.hash_code = self.hash()
+
+    def add_transaction(self, transaction):
+        """
+        the function adds the transaction
+        to the list in the block
+        :param transaction: a transaction to add
+        """
+        self.transactions.append(transaction)
 
 
 if __name__ == "__main__":

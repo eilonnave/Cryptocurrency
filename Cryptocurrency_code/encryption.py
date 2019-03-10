@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from Crypto.PublicKey import *
 from Crypto.Hash import *
+from Crypto.Signature import *
 ENCRYPTION_PARAMETER = 32
 
 
@@ -34,7 +35,8 @@ class EncryptionSet:
         :return: the signature that created from
         the key and the message
         """
-        return self.private_key.sign(hash_code, '')
+        signer = PKCS1_v1_5.new(self.private_key)
+        return signer.sign(hash_code)
 
     def decrypt(self, encrypted_message):
         """
@@ -58,7 +60,8 @@ class EncryptionSet:
         :returns: true if he signature is authentic
         and false otherwise
         """
-        return sender_public_key.verify(hash_code, signature)
+        verifier = PKCS1_v1_5.new(sender_public_key)
+        return verifier.verify(hash_code, signature)
 
     @staticmethod
     def hash(message):
@@ -68,7 +71,7 @@ class EncryptionSet:
         :param message: the message to hash
         :returns: the hash code
         """
-        return SHA256.new(message).hexdigest()
+        return SHA256.new(message)
 
 
 if __name__ == '__main__':

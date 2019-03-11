@@ -5,7 +5,7 @@ from Crypto.Signature import *
 ENCRYPTION_PARAMETER = 32
 
 
-class EncryptionSet:
+class EncryptionSet(object):
     def __init__(self, private_key):
         """
         constructor

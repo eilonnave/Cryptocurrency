@@ -1,17 +1,21 @@
 # -*- coding: utf-8 -*-
 import hashlib
+STARTER_NONCE = 0
+DIFFICULTY = 4
 
 
 class Block:
-    def __init__(self, number, nonce, prev, transactions):
+    def __init__(self, number, prev, transactions):
         """
         constructor
         """
         self.number = number
-        self.nonce = nonce
+        self.nonce = STARTER_NONCE
         self.prev = prev
+        self.difficulty = DIFFICULTY
         self.transactions = transactions
-        self.hash_code = self.hash_block()
+        self.hash_code = ''
+        self.hash_block()
 
     def to_string(self):
         """
@@ -20,7 +24,8 @@ class Block:
         """
         block_string = str(
             self.number)+str(
-                self.nonce)+self.prev+self.hash_transactions()
+                self.nonce)+self.prev+str(
+                    self.difficulty)+self.hash_transactions()
         return block_string
 
     def hash_block(self):
@@ -29,7 +34,7 @@ class Block:
         :returns: the hash value of the
         block's properties
         """
-        return hashlib.sha256(
+        self.hash_code = hashlib.sha256(
             self.to_string().encode(
                 'utf-8')).hexdigest()
 
@@ -48,15 +53,6 @@ class Block:
                 transactions_hash+transaction_hash).hexdigest()
         return transactions_hash
 
-    def update_hash(self, nonce):
-        """
-        update the block hash according to
-        to the new nonce
-        :param nonce: the new nonce
-        """
-        self.nonce = nonce
-        self.hash_code = self.hash_block()
-
     def add_transaction(self, transaction):
         """
         the function adds the transaction
@@ -65,14 +61,31 @@ class Block:
         """
         self.transactions.append(transaction)
 
+    def mine_block(self):
+        """
+        the function mines the block
+        """
+        self.nonce = STARTER_NONCE
+        while not self.is_valid_proof():
+            self.nonce += 1
+            self.hash_block()
+
+    def is_valid_proof(self):
+        """
+        check if the block hash is valid
+        :returns: whether the proof of work
+        on the block is valid
+        """
+        return self.hash_code[0:self.difficulty] == '0'*self.difficulty
+
 
 if __name__ == "__main__":
-    block_1 = Block(0, 0, '0', [])
-    block_2 = Block(1, 0, block_1.hash_code, [])
+    block_1 = Block(0, '0', [])
+    block_2 = Block(1, block_1.hash_code, [])
     assert block_1.hash_code != block_2.hash_code
     block_2.prev = '0'
-    block_2.hash_code = block_2.hash_block()
+    block_2.hash_block()
     assert block_1.hash_code != block_2.hash_code
     block_2.number = 0
-    block_2.hash_code = block_2.hash_block()
+    block_2.hash_block()
     assert block_1.hash_code == block_2.hash_code

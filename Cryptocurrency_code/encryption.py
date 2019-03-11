@@ -80,12 +80,12 @@ if __name__ == '__main__':
     private_key_2 = RSA.generate(2048)
     encryption_set_2 = EncryptionSet(private_key_2)
     message_to_encrypt = 'try to encrypt'
-    encryp_message = encryption_set_1.encrypt(
+    assert_encrypt_message = encryption_set_1.encrypt(
         encryption_set_2.public_key,
         message_to_encrypt)
-    decrypted_message = encryption_set_2.decrypt(encryp_message)
+    decrypted_message = encryption_set_2.decrypt(assert_encrypt_message)
     assert decrypted_message == message_to_encrypt
-    decrypted_message = encryption_set_1.decrypt(encryp_message)
+    decrypted_message = encryption_set_1.decrypt(assert_encrypt_message)
     assert decrypted_message != message_to_encrypt
     assert_hash_code = encryption_set_1.hash(message_to_encrypt)
     assert_signature = encryption_set_1.sign(assert_hash_code)

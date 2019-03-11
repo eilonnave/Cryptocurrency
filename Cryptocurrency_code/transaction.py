@@ -1,26 +1,43 @@
 # -*- coding: utf-8 -*-
+from Crypto.Hash import *
 COMMISSION = 5
 
 
 class Transaction:
-    def __init__(self, sender_address, recipient_address, amount):
+    def __init__(self, transaction_id, inputs, outputs):
         """
         constructor
         """
-        self.sender_address = sender_address
-        self.recipient_address = recipient_address
-        self.amount = amount
-        self.commission = COMMISSION
+        self.transaction_id = transaction_id
+        self.inputs = inputs
+        self.outputs = outputs
 
-    def to_string(self):
+    def hash_transaction(self):
         """
-        converts the transaction to a string
-        :returns: the transaction's string
+        the function hashes the transaction's id
+        :returns: the hashed id
         """
-        s = self.sender_address+'\n'
-        s += self.recipient_address+'\n'
-        s += str(self.amount)+'\n'
-        s += str(self.commission)
-        return s
+        return SHA256.new(self.transaction_id)
+
+
+class Output:
+    def __init__(self, value, script_public_key):
+        """
+        constructor
+        """
+        self.value = value
+        self.script_public_key = script_public_key
+
+
+class Input:
+    def __init__(self, transaction_id, script_sig):
+        """
+        constructor
+        """
+        self.transaction_id = transaction_id
+        self.script_sig = script_sig
+
+
+
 
 

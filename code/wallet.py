@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from encryption import EncryptionSet
 from Crypto.PublicKey import *
+from Crypto.Hash import *
 
 
 class Wallet(EncryptionSet):
@@ -9,6 +10,17 @@ class Wallet(EncryptionSet):
         constructor
         """
         super(Wallet, self).__init__(private_key)
+        self.address = SHA256.new(self.public_key.exportKey())
+
+    def can_unlock_output(self, transaction_output):
+        """
+        the function checks if the wallet
+        can unlock the output
+        :param transaction_output: an output from a transaction
+        :returns: true if the output can be unlocked,
+        otherwise false
+        """
+        wallet_proof = ()
 
 
 def new_wallet():

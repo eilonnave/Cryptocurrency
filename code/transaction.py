@@ -30,12 +30,15 @@ class Output:
 
 
 class Input:
-    def __init__(self, transaction_id, script_sig):
+    def __init__(self, output_id, output_index, script_sig):
         """
         constructor
         """
-        self.transaction_id = transaction_id
+        self.output_id = output_id
+        self.output_index = output_index
         self.script_sig = script_sig
+
+
 
 
 

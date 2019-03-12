@@ -37,10 +37,3 @@ class Input:
         self.output_id = output_id
         self.output_index = output_index
         self.script_sig = script_sig
-
-
-
-
-
-
-

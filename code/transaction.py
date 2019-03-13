@@ -12,6 +12,22 @@ class Transaction:
         self.outputs = outputs
         self.transaction_id = self.hash_transaction()
 
+    def add_input(self, transaction_input):
+        """
+        the function adds the input
+        to the transaction and updates the id
+        """
+        self.inputs.append(transaction_input)
+        self.transaction_id = self.hash_transaction()
+
+    def add_output(self, transaction_output):
+        """
+        the function adds the output
+        to the transaction and updates the id
+        """
+        self.outputs.append(transaction_output)
+        self.transaction_id = self.hash_transaction()
+
     def hash_transaction(self):
         """
         the function hashes the transaction's id
@@ -85,3 +101,14 @@ class Input:
         input_string += str(self.output_index)
         input_string += self.proof
         return input_string
+
+
+class UnspentOutput:
+    def __init__(self, output, transaction_id, output_index, proof):
+        """
+        constructor
+        """
+        self.output = output
+        self.transaction_id = transaction_id
+        self.output_index = output_index
+        self.proof = proof

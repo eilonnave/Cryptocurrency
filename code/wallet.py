@@ -2,8 +2,7 @@
 from encryption import EncryptionSet
 from Crypto.PublicKey import *
 from Crypto.Hash import *
-from blockchain import BlockChain
-from transaction import *
+from transaction import Transaction, Input, Output, UnspentOutput
 
 
 class Wallet(EncryptionSet):
@@ -12,12 +11,20 @@ class Wallet(EncryptionSet):
         constructor
         """
         super(Wallet, self).__init__(private_key)
-        self.address = SHA256.new(self.public_key.exportKey())
+        self.address = SHA256.new(self.public_key.exportKey()).hexdigest()
         self.block_chain = block_chain
         self.unspent_outputs = []
         self.update_unspent_outputs()
         self.balance = 0
         self.update_balance()
+
+    @classmethod
+    def new_wallet(cls, block_chain):
+        """
+        factory method
+        """
+        private_key = RSA.generate(2048)
+        return cls(private_key, block_chain)
 
     def can_unlock_output(self, transaction_output):
         """
@@ -57,7 +64,7 @@ class Wallet(EncryptionSet):
                             return False
         return True
         """
-        need to be done by unspent transactions data base data base
+        need to be done by unspent transactions data base
         """
 
     def update_balance(self):
@@ -128,29 +135,3 @@ class Wallet(EncryptionSet):
         need to insert change option
         """
         self.block_chain.add_transaction(new_transaction)
-
-
-def new_wallet(block_chain):
-    """
-    the function creates new wallet
-    and returns it
-    :param block_chain: the block_chain that the wallet
-    is belong to
-    :returns: the new wallet
-    """
-    private_key = RSA.generate(2048)
-    wallet = Wallet(private_key, block_chain)
-    return wallet
-
-
-if __name__ == "__main__":
-    test_block_chain = BlockChain()
-    w1 = new_wallet(test_block_chain)
-    pub1 = w1.public_key.exportKey()
-    w2 = new_wallet(test_block_chain)
-    pub2 = w2.public_key.exportKey()
-    w3 = new_wallet(test_block_chain)
-    pub3 = w3.public_key.exportKey()
-    assert pub1 != pub2
-    assert pub1 != pub3
-    assert pub2 != pub3

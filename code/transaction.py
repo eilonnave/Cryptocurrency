@@ -62,7 +62,7 @@ class Output:
         :returns: the hash code of the
         input
         """
-        return SHA256.new(self.to_string()).hex_digesst()
+        return SHA256.new(self.to_string()).hexdigest()
 
     def to_string(self):
         """
@@ -90,7 +90,7 @@ class Input:
         :returns: the hash code of the
         input
         """
-        return SHA256.new(self.to_string()).hex_digest()
+        return SHA256.new(self.to_string()).hexdigest()
 
     def to_string(self):
         """
@@ -99,7 +99,11 @@ class Input:
         """
         input_string = self.transaction_id
         input_string += str(self.output_index)
-        input_string += self.proof
+        if self.output_index != -1:
+            input_string += str(self.proof[0])
+            input_string += self.proof[0].exportKey()
+        else:
+            input_string += self.proof
         return input_string
 
 

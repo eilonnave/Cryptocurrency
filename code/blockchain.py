@@ -24,14 +24,14 @@ class BlockChain:
         else:
             prev = self.chain[-1].hash_code
 
-        block = Block(number, prev, self.transactions_pool)
-        block.mine_block()
-        self.chain.append(block)
         transaction_input = Input("", -1, miner_address)
         transaction_output = Output(REWORD, miner_address)
         new_transaction = Transaction([transaction_input],
                                       [transaction_output])
         self.add_transaction(new_transaction)
+        block = Block(number, prev, self.transactions_pool)
+        block.mine_block()
+        self.chain.append(block)
         self.transactions_pool = []
 
     def add_transaction(self, transaction):
@@ -41,9 +41,3 @@ class BlockChain:
         :param transaction: new transaction to add
         """
         self.transactions_pool.append(transaction)
-
-
-if __name__ == "__main__":
-    block_chain = BlockChain()
-    block_chain.add_new_block()
-    assert block_chain.chain[0].is_valid_proof()

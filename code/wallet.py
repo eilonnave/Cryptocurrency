@@ -72,10 +72,20 @@ class Wallet(EncryptionSet):
         the function calculate and
         updates the wallet's balance
         """
+        self.update_unspent_outputs()
         balance = 0
         for unspent_output in self.unspent_outputs:
             balance += unspent_output.output.value
         self.balance = balance
+
+    def get_balance(self):
+        """
+        the function updates the balance
+        and returns it
+        :returns: the updated balance
+        """
+        self.update_balance()
+        return self.balance
 
     def update_unspent_outputs(self):
         """
@@ -135,3 +145,4 @@ class Wallet(EncryptionSet):
         need to insert change option
         """
         self.block_chain.add_transaction(new_transaction)
+        return True

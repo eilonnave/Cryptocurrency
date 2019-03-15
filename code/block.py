@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import hashlib
 STARTER_NONCE = 0
-DIFFICULTY = 4
+DIFFICULTY = 2
 
 
 class Block:
@@ -46,9 +46,9 @@ class Block:
         """
         if len(self.transactions) == 0:
             return ''
-        transactions_hash = self.transactions[0].hash_transaction().hex_digest()
+        transactions_hash = self.transactions[0].hash_transaction()
         for transaction in self.transactions[1:]:
-            transaction_hash = transaction.hash_transaction().hex_digest()
+            transaction_hash = transaction.hash_transaction()
             transactions_hash = hashlib.sha256(
                 transactions_hash+transaction_hash).hexdigest()
         return transactions_hash

@@ -24,7 +24,12 @@ class BlockChain:
         else:
             prev = self.chain[-1].hash_code
 
-        transaction_input = Input("", -1, miner_address)
+        transaction_input = Input(str(len(self.chain)), -1, miner_address)
+        """
+        for checking that the block is legit, I must add
+        checking that in the input the implementation of
+         the chain's length is right
+        """
         transaction_output = Output(REWORD, miner_address)
         new_transaction = Transaction([transaction_input],
                                       [transaction_output])

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import hashlib
 STARTER_NONCE = 0
-DIFFICULTY = 2
+DIFFICULTY = 4
 
 
 class Block:

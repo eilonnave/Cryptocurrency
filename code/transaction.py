@@ -34,16 +34,21 @@ class Transaction:
         :returns: the hashed id
         """
         transaction_hash = ''
+
+        # hash the inputs
         if len(self.inputs) != 0:
             transaction_hash = self.inputs[0].hash_input()
             for transaction_input in self.inputs[1:]:
                 transaction_hash += transaction_input.hash_input()
                 transaction_hash = SHA256.new(transaction_hash).hexdigest()
+
+        # hash the outputs
         if len(self.outputs) == 0:
             return transaction_hash
         for transaction_output in self.outputs:
             transaction_hash += transaction_output.hash_output()
             transaction_hash = SHA256.new(transaction_hash).hexdigest()
+
         return transaction_hash
 
 
@@ -108,11 +113,10 @@ class Input:
 
 
 class UnspentOutput:
-    def __init__(self, output, transaction_id, output_index, proof):
+    def __init__(self, output, transaction_id, output_index):
         """
         constructor
         """
         self.output = output
         self.transaction_id = transaction_id
         self.output_index = output_index
-        self.proof = proof

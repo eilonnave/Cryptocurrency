@@ -6,12 +6,13 @@ REWORD = 50
 
 
 class BlockChain:
-    def __init__(self):
+    def __init__(self, logger):
         """
         constructor
         """
         self.chain = []
         self.transactions_pool = []
+        self.logger = logger
 
     def add_new_block(self, miner_address):
         """
@@ -19,25 +20,34 @@ class BlockChain:
         and rewards the miner
         """
         number = len(self.chain)
+
+        # handle genesis block
         if number == 0:
-            prev = '0'*256
+            prev = '0'*32
         else:
             prev = self.chain[-1].hash_code
 
+        # transaction that rewards the miner
         transaction_input = Input(str(len(self.chain)), -1, miner_address)
         """
         for checking that the block is legit, I must add
         checking that in the input the implementation of
-         the chain's length is right
+        the chain's length is right
         """
         transaction_output = Output(REWORD, miner_address)
         new_transaction = Transaction([transaction_input],
                                       [transaction_output])
         self.add_transaction(new_transaction)
+
+        # create the block
         block = Block(number, prev, self.transactions_pool)
+        self.logger.info('Mining new block')
         block.mine_block()
+
+        # set the block chain
         self.chain.append(block)
         self.transactions_pool = []
+        self.logger.info('The new bock was added to the block chain')
 
     def add_transaction(self, transaction):
         """

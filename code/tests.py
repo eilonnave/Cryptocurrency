@@ -2,24 +2,26 @@
 from wallet import Wallet
 from blockchain import BlockChain
 from miner import Miner
+from logger import Logger
 
 
 def test1():
     """
     tests wallets without p2p network
     """
-    block_chain = BlockChain()
+    logger = Logger('test1')
+    block_chain = BlockChain(logger)
 
     # creates two wallets in the system
-    wallet1 = Wallet.new_wallet(block_chain)
-    wallet2 = Wallet.new_wallet(block_chain)
+    wallet1 = Wallet.new_wallet(block_chain, logger)
+    wallet2 = Wallet.new_wallet(block_chain, logger)
 
     # check that their initial value is 0
     assert wallet1.balance == 0
     assert wallet2.balance == 0
 
     # creates the miner in the system
-    wallet3 = Wallet.new_wallet(block_chain)
+    wallet3 = Wallet.new_wallet(block_chain, logger)
     miner = Miner(wallet3)
 
     # mine the genesis block and check the miner balance

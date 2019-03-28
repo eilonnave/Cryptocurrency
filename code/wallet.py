@@ -6,7 +6,7 @@ from transaction import Transaction, Input, Output, UnspentOutput
 
 
 class Wallet(EncryptionSet):
-    def __init__(self, private_key, block_chain):
+    def __init__(self, private_key, block_chain, logger):
         """
         constructor
         """
@@ -17,33 +17,32 @@ class Wallet(EncryptionSet):
         self.update_unspent_outputs()
         self.balance = 0
         self.update_balance()
-
+        self.logger = logger
+        self.logger.info(
+            "Address- "
+            ""+self.address+' is in the system')
 
     @classmethod
-    def new_wallet(cls, block_chain):
+    def new_wallet(cls, block_chain, logger):
         """
         factory method
         """
+        logger.info("Creating new wallet")
         private_key = RSA.generate(2048)
-        return cls(private_key, block_chain)
+        return cls(private_key, block_chain, logger)
 
     def can_unlock_output(self, transaction_output):
         """
         the function checks if the wallet
         can unlock the output
         :param transaction_output: an output from a transaction
-        :returns: true if the output can be unlocked and
-        the proof,
+        :returns: true if the output can be unlocked
         otherwise false
         """
         unlock_address = transaction_output.address
         if unlock_address != self.address:
-            return False, None
-        """
-        code that verifies the signature
-        """
-        signature = ''
-        return True, (signature, self.public_key)
+            return False
+        return True
 
     def is_unspent_output(self, transaction_to_check, output_index):
         """
@@ -103,14 +102,13 @@ class Wallet(EncryptionSet):
             for transaction in block.transactions:
                 output_index = 0
                 for transaction_output in transaction.outputs:
-                    can_unlock, proof = self.can_unlock_output(transaction_output)
+                    can_unlock = self.can_unlock_output(transaction_output)
                     if can_unlock and self.is_unspent_output(
                             transaction, output_index):
                         unspent_outputs.append(UnspentOutput(
                             transaction_output,
                             transaction.transaction_id,
-                            output_index,
-                            proof))
+                            output_index))
                     output_index += 1
 
         self.unspent_outputs = unspent_outputs
@@ -133,18 +131,25 @@ class Wallet(EncryptionSet):
         # checks weather there is enough money
         # to the transaction
         if amount > self.balance:
-            print 'not enough money to send\n' \
-                  'money to send: '+str(amount)+'\n current balance: '+str(self.balance)
+            self.logger.info(self.address+'- not enough money to send')
             return False
 
         # creates the new transaction
         new_transaction = Transaction([], [])
         sending_amount = 0
         for unspent_output in self.unspent_outputs:
+            # creating the proof
+            data_to_sign = unspent_output.transaction_id
+            data_to_sign += recipient_address
+            data_to_sign = self.hash(data_to_sign).hexdigest()
+            data_to_sign += str(amount)
+            data_to_sign = self.hash(data_to_sign)
+            signature = self.sign(data_to_sign)
+            proof = (signature, self.public_key)
             new_transaction.add_input(Input(
                 unspent_output.transaction_id,
                 unspent_output.output_index,
-                unspent_output.proof))
+                proof))
             sending_amount += unspent_output.output.value
             if sending_amount >= amount:
                 break
@@ -158,6 +163,8 @@ class Wallet(EncryptionSet):
             new_transaction.add_output(Output(change, self.address))
 
         # distributes the transaction
+        self.logger.info(self.address+" is sending "+str(
+            amount)+"LPC to "+recipient_address)
         self.distribute_transaction(new_transaction)
         return True
 

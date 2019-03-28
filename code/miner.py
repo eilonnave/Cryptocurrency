@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-from transaction import Transaction, Input, Output
-
-
 class Miner:
     def __init__(self, wallet):
         """

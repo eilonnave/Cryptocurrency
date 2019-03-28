@@ -18,6 +18,7 @@ class Wallet(EncryptionSet):
         self.balance = 0
         self.update_balance()
 
+
     @classmethod
     def new_wallet(cls, block_chain):
         """
@@ -37,7 +38,7 @@ class Wallet(EncryptionSet):
         """
         unlock_address = transaction_output.address
         if unlock_address != self.address:
-            return False, ''
+            return False, None
         """
         code that verifies the signature
         """
@@ -55,6 +56,8 @@ class Wallet(EncryptionSet):
         :returns: false if the output was spent
         and true otherwise
         """
+        # go throw all the inputs in the block chain
+        # and checks weather they use the output
         for block in self.block_chain.chain:
             for transaction in block.transactions:
                 for transaction_input in transaction.inputs:
@@ -94,6 +97,8 @@ class Wallet(EncryptionSet):
         and updates it
         """
         unspent_outputs = []
+
+        # go throw all the outputs in the block chain
         for block in self.block_chain.chain:
             for transaction in block.transactions:
                 output_index = 0
@@ -107,6 +112,7 @@ class Wallet(EncryptionSet):
                             output_index,
                             proof))
                     output_index += 1
+
         self.unspent_outputs = unspent_outputs
 
     def create_transaction(self, amount, recipient_address):
@@ -118,16 +124,20 @@ class Wallet(EncryptionSet):
         :param amount: the amount to send
         :param recipient_address: the address to send the
         coins to
-        :returns: true if the transaction has been
-        implemented to the block chain and false if
-        there is a problem with it
+        :returns: true if there is enough money to the
+        transaction and false otherwise
         """
-        self.update_unspent_outputs()
+        # updates the balance
         self.update_balance()
+
+        # checks weather there is enough money
+        # to the transaction
         if amount > self.balance:
             print 'not enough money to send\n' \
                   'money to send: '+str(amount)+'\n current balance: '+str(self.balance)
             return False
+
+        # creates the new transaction
         new_transaction = Transaction([], [])
         sending_amount = 0
         for unspent_output in self.unspent_outputs:
@@ -141,8 +151,20 @@ class Wallet(EncryptionSet):
         new_transaction.add_output(
             Output(sending_amount,
                    recipient_address))
-        """
-        need to insert change option
-        """
-        self.block_chain.add_transaction(new_transaction)
+
+        # add change if it is needed
+        if sending_amount > amount:
+            change = sending_amount - amount
+            new_transaction.add_output(Output(change, self.address))
+
+        # distributes the transaction
+        self.distribute_transaction(new_transaction)
         return True
+
+    def distribute_transaction(self, transaction):
+        """
+        the function distributes the transaction
+        to the nodes
+        :param transaction: the transaction to distribute
+        """
+        self.block_chain.add_transaction(transaction)

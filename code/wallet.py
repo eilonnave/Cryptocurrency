@@ -11,7 +11,10 @@ class Wallet(EncryptionSet):
         constructor
         """
         super(Wallet, self).__init__(private_key)
-        self.address = SHA256.new(self.public_key.exportKey()).hexdigest()
+        self.address = RIPEMD.new(
+            SHA256.new(
+                self.public_key.exportKey()).
+            hexdigest()).hexdigest()
         self.block_chain = block_chain
         self.unspent_outputs = []
         self.update_unspent_outputs()

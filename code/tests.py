@@ -10,7 +10,7 @@ def test1():
     tests wallets without p2p network
     """
     logger = Logger('test1')
-    block_chain = BlockChain(logger)
+    block_chain = BlockChain.new_block_chain(logger)
 
     # creates two wallets in the system
     wallet1 = Wallet.new_wallet(block_chain, logger)
@@ -57,6 +57,8 @@ def test1():
     # check the balances
     assert wallet2.get_balance() == second_balance - 1
     assert not wallet2.create_transaction(second_balance, wallet1.address)
+
+    logger.info('finish successful test 1')
 
 
 if __name__ == '__main__':

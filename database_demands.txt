@@ -1,0 +1,7 @@
+What should be in my data base?
+
+1. The data base is key value database
+2. serialize and deserialize methods of the blocks, the wallet's private key and the UTXO
+3. dealings with errors
+4. I'll create my own database using one file for the blockchain
+5. if there is time I will improve my db

@@ -6,18 +6,27 @@ REWORD = 50
 
 
 class BlockChain:
-    def __init__(self, logger):
+    def __init__(self, chain, logger):
         """
         constructor
         """
-        self.chain = []
+        self.chain = chain
         self.transactions_pool = []
         self.logger = logger
+
+    @classmethod
+    def new_block_chain(cls, logger):
+        """
+        factory method
+        """
+        return cls([], logger)
 
     def add_new_block(self, miner_address):
         """
         the function adds new block to the chain
         and rewards the miner
+        :param miner_address: the miner address
+        to reward
         """
         number = len(self.chain)
 

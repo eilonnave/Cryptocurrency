@@ -51,6 +51,24 @@ class Transaction:
 
         return transaction_hash
 
+    def serialize(self):
+        """
+        the function serializes the transaction
+        :returns: the serialized transaction
+        """
+        serialized_inputs = '['
+        for transaction_input in self.inputs:
+            serialized_inputs += transaction_input.serialize()+', '
+        serialized_inputs = serialized_inputs[:-2]+']'
+        serialized_outputs = '['
+        for transaction_output in self.outputs:
+            serialized_outputs += transaction_output.serialize()+', '
+        serialized_outputs = serialized_outputs[:-2]+']'
+        serialized_transaction = {'inputs': serialized_inputs,
+                                  'outputs': serialized_outputs,
+                                  'transaction_id': self.transaction_id}
+        return str(serialized_transaction)
+
 
 class Output:
     def __init__(self, value, address):
@@ -77,6 +95,14 @@ class Output:
         output_string = str(self.value)
         output_string += self.address
         return output_string
+
+    def serialize(self):
+        """
+        the function serializes the output
+        :returns: the serialized output
+        """
+        return str({'value': str(self.value),
+                    'address': self.address})
 
 
 class Input:
@@ -110,6 +136,17 @@ class Input:
         else:
             input_string += self.proof
         return input_string
+
+    def serialize(self):
+        """
+        the function serializes the input
+        :returns: the serialized input
+        """
+        return str({'transaction_id': self.transaction_id,
+                    'output_index': str(self.output_index),
+                    'proof': '('+str(self.proof[0])
+                                + ', ' +
+                             self.proof[1].exportKey()+')'})
 
 
 class UnspentOutput:

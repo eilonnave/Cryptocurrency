@@ -1,21 +1,46 @@
 # -*- coding: utf-8 -*-
 import hashlib
+import time
 STARTER_NONCE = 0
 DIFFICULTY = 4
+BLOCK_STRUCTURE = '(number integer, ' \
+                  'nonce integer, ' \
+                  'prev text, ' \
+                  'difficulty integer, ' \
+                  'transactions text, ' \
+                  'time_stamp integer, ' \
+                  'hash text)'
 
 
 class Block:
-    def __init__(self, number, prev, transactions):
+    def __init__(self,
+                 number,
+                 nonce,
+                 prev,
+                 difficulty,
+                 transactions,
+                 time_stamp):
         """
         constructor
         """
         self.number = number
-        self.nonce = STARTER_NONCE
+        self.nonce = nonce
         self.prev = prev
-        self.difficulty = DIFFICULTY
+        self.difficulty = difficulty
         self.transactions = transactions
+        self.time_stamp = time_stamp
         self.hash_code = ''
         self.hash_block()
+
+    @classmethod
+    def new_block(cls, number, prev, transactions):
+        """
+        factory method
+        """
+        nonce = STARTER_NONCE
+        difficulty = DIFFICULTY
+        time_stamp = time.time()
+        return cls(number, nonce, prev, difficulty, transactions, time_stamp)
 
     def to_string(self):
         """
@@ -25,7 +50,8 @@ class Block:
         block_string = str(
             self.number)+str(
                 self.nonce)+self.prev+str(
-                    self.difficulty)+self.hash_transactions()
+                    self.difficulty)+self.hash_transactions()+str(
+                        self.time_stamp)
         return block_string
 
     def hash_block(self):
@@ -78,10 +104,33 @@ class Block:
         """
         return self.hash_code[0:self.difficulty] == '0'*self.difficulty
 
+    def serialize(self):
+        """
+        the function serializes the block
+        :returns: the serialized block
+        """
+        """
+        return (block.number,block.nonce,block.prev,block.difficulty,block.transactions,block.time_stamp,block.hash_code)
+        """
+        serialized_transactions = '[]'
+        if len(self.transactions) != 0:
+            serialized_transactions = '['
+            for transaction in self.transactions:
+                serialized_transactions += transaction.serialize()+', '
+            serialized_transactions = serialized_transactions[:-2]+']'
+        return '({0},{1},{2},{3},{4},{5},{6})'.format(
+            self.number,
+            self.nonce,
+            self.prev,
+            self.difficulty,
+            serialized_transactions,
+            self.time_stamp,
+            self.hash_code)
+
 
 if __name__ == "__main__":
-    block_1 = Block(0, '0', [])
-    block_2 = Block(1, block_1.hash_code, [])
+    block_1 = Block.new_block(0, '0', [])
+    block_2 = Block.new_block(1, block_1.hash_code, [])
     assert block_1.hash_code != block_2.hash_code
     block_2.prev = '0'
     block_2.hash_block()
@@ -89,3 +138,4 @@ if __name__ == "__main__":
     block_2.number = 0
     block_2.hash_block()
     assert block_1.hash_code == block_2.hash_code
+    print block_1.serialize()

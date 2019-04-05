@@ -49,7 +49,7 @@ class BlockChain:
         self.add_transaction(new_transaction)
 
         # create the block
-        block = Block(number, prev, self.transactions_pool)
+        block = Block.new_block(number, prev, self.transactions_pool)
         self.logger.info('Mining new block')
         block.mine_block()
 

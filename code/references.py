@@ -3,10 +3,10 @@ import os
 import pickle
 REFERENCES_FILE = 'references.pickle'
 DEFAULT_DB_DIR = 'c:'
-DEFAULT_BCK_REFERENCE = 'C:/bck.db'
+DEFAULT_BCK_REFERENCE = 'bck.db'
 SECONDARY_BCK_REFERENCE = '.bck.db'
 BLOCK_CHAIN_KEY = 'bck'
-DEFAULT_UTXO_REFERENCE = 'C:/utxo.db'
+DEFAULT_UTXO_REFERENCE = 'utxo.db'
 SECONDARY_UTXO_REFERENCE = '.utxo.db'
 UNSPENT_OUTPUTS_KEY = 'utxo'
 

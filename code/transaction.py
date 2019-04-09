@@ -56,14 +56,18 @@ class Transaction:
         the function serializes the transaction
         :returns: the serialized transaction
         """
+        # serializes the inputs
         serialized_inputs = '['
         for transaction_input in self.inputs:
             serialized_inputs += transaction_input.serialize()+', '
         serialized_inputs = serialized_inputs[:-2]+']'
+
+        # serializes the outputs
         serialized_outputs = '['
         for transaction_output in self.outputs:
             serialized_outputs += transaction_output.serialize()+', '
         serialized_outputs = serialized_outputs[:-2]+']'
+
         serialized_transaction = {'inputs': serialized_inputs,
                                   'outputs': serialized_outputs,
                                   'transaction_id': self.transaction_id}
@@ -142,11 +146,16 @@ class Input:
         the function serializes the input
         :returns: the serialized input
         """
+        serialized_input = self.__dict__
+        serialized_input['proof'] = str((str(self.proof[0]), self.proof[1].exportKey()))
+        """
         return str({'transaction_id': self.transaction_id,
                     'output_index': str(self.output_index),
                     'proof': '('+str(self.proof[0])
                                 + ', ' +
                              self.proof[1].exportKey()+')'})
+                             """
+        return str(serialized_input)
 
 
 class UnspentOutput:

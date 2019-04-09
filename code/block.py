@@ -109,15 +109,14 @@ class Block:
         the function serializes the block
         :returns: the serialized block
         """
-        """
-        return (block.number,block.nonce,block.prev,block.difficulty,block.transactions,block.time_stamp,block.hash_code)
-        """
+        # serializes the transactions
         serialized_transactions = '[]'
         if len(self.transactions) != 0:
             serialized_transactions = '['
             for transaction in self.transactions:
                 serialized_transactions += transaction.serialize()+', '
             serialized_transactions = serialized_transactions[:-2]+']'
+
         return '({0},{1},{2},{3},{4},{5},{6})'.format(
             self.number,
             self.nonce,
@@ -131,11 +130,4 @@ class Block:
 if __name__ == "__main__":
     block_1 = Block.new_block(0, '0', [])
     block_2 = Block.new_block(1, block_1.hash_code, [])
-    assert block_1.hash_code != block_2.hash_code
-    block_2.prev = '0'
-    block_2.hash_block()
-    assert block_1.hash_code != block_2.hash_code
-    block_2.number = 0
-    block_2.hash_block()
-    assert block_1.hash_code == block_2.hash_code
     print block_1.serialize()

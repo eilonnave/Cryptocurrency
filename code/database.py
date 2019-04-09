@@ -88,7 +88,6 @@ class BlockChainDB(DB):
             BLOCK_STRUCTURE)
         self.create_table()
 
-
     def deserialize(self, serialize_block):
         number = serialize_block[0]
         nonce = serialize_block[1]
@@ -103,11 +102,22 @@ class BlockChainDB(DB):
                      transactions,
                      time_stamp)
 
+    def serialize(self, obj):
+        """
+        the function serializes the object
+        :param obj: the object to serialize
+        :returns: the serialize object
+        """
+        pass
+
 
 if __name__ == "__main__":
     encryption_set = EncryptionSet(RSA.generate(2048))
     db = BlockChainDB()
+    i = Input('111', 1, ('1234', encryption_set.public_key))
+    print i.serialize()
     i = [Input('111', 1, ('1234', encryption_set.public_key))]
     o = [Output(43, encryption_set.hash(encryption_set.public_key.exportKey()).hexdigest())]
     t = Transaction(i, o)
+    print vars(t)
     print eval(t.serialize())

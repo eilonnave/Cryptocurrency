@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 import hashlib
 import time
+
+
 STARTER_NONCE = 0
 DIFFICULTY = 4
 BLOCK_STRUCTURE = '(number integer, ' \
                   'nonce integer, ' \
                   'prev text, ' \
                   'difficulty integer, ' \
-                  'transactions text, ' \
                   'time_stamp integer, ' \
                   'hash text)'
+BLOCKS_TABLE_NAME = 'blocks'
 
 
 class Block:
@@ -109,20 +111,11 @@ class Block:
         the function serializes the block
         :returns: the serialized block
         """
-        # serializes the transactions
-        serialized_transactions = '[]'
-        if len(self.transactions) != 0:
-            serialized_transactions = '['
-            for transaction in self.transactions:
-                serialized_transactions += transaction.serialize()+', '
-            serialized_transactions = serialized_transactions[:-2]+']'
-
-        return '({0},{1},{2},{3},{4},{5},{6})'.format(
+        return '({0},{1},{2},{3},{4},{5})'.format(
             self.number,
             self.nonce,
             self.prev,
             self.difficulty,
-            serialized_transactions,
             self.time_stamp,
             self.hash_code)
 

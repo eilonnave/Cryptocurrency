@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 from Crypto.Hash import *
-COMMISSION = 5
+
+
+UN_SPENT_OUTPUTS_TABLE_NAME = 'utxo'
+TRANSACTIONS_TABLE_NAME = 'transactions'
+INPUTS_TABLE_NAME = 'inputs'
+OUTPUTS_TABLE_NAME = 'outputs'
+TRANSACTION_STRUCTURE = '(number integer, nonce integer, prev text, difficulty integer, time_stamp integer, hash text)'
 
 
 class Transaction:
@@ -51,10 +57,13 @@ class Transaction:
 
         return transaction_hash
 
-    def serialize(self):
+    def serialize(self, transaction_number, block_number):
         """
         the function serializes the transaction
+        :param block_number: the block number which the
+        transaction belongs to
         :returns: the serialized transaction
+        """
         """
         # serializes the inputs
         serialized_inputs = '['
@@ -72,6 +81,11 @@ class Transaction:
                                   'outputs': serialized_outputs,
                                   'transaction_id': self.transaction_id}
         return str(serialized_transaction)
+        """
+        return '({0},{1})'.format(
+            transaction_number,
+            self.transaction_id,
+            block_number,)
 
 
 class Output:
@@ -100,13 +114,21 @@ class Output:
         output_string += self.address
         return output_string
 
-    def serialize(self):
+    def serialize(self, transaction_number):
         """
         the function serializes the output
+        :param transaction_number: the transaction number which the
+        output belongs to
         :returns: the serialized output
+        """
         """
         return str({'value': str(self.value),
                     'address': self.address})
+        """
+        return '({0},{1},{2})'.format(
+            self.value,
+            self.address,
+            transaction_number)
 
 
 class Input:
@@ -141,13 +163,13 @@ class Input:
             input_string += self.proof
         return input_string
 
-    def serialize(self):
+    def serialize(self, transaction_number):
         """
         the function serializes the input
+        :param transaction_number: the transaction number which the
+        input belongs to
         :returns: the serialized input
         """
-        serialized_input = self.__dict__
-        serialized_input['proof'] = str((str(self.proof[0]), self.proof[1].exportKey()))
         """
         return str({'transaction_id': self.transaction_id,
                     'output_index': str(self.output_index),
@@ -155,7 +177,11 @@ class Input:
                                 + ', ' +
                              self.proof[1].exportKey()+')'})
                              """
-        return str(serialized_input)
+        return '({0},{1},{2},{3})'.format(
+            self.transaction_id,
+            self.output_index,
+            str(self.proof),
+            transaction_number)
 
 
 class UnspentOutput:

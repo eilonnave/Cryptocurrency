@@ -2,24 +2,20 @@
 import sqlite3
 from references import References
 from abc import abstractmethod, ABCMeta
-from block import BLOCK_STRUCTURE, Block
-from transaction import Input, Output, Transaction
+from block import BLOCK_STRUCTURE, Block, BLOCKS_TABLE_NAME
+from transaction import *
 from encryption import *
-BLOCK_CHAIN_TABLE = 'bck'
-UN_SPENT_OUTPUTS_TABLE = 'utxo'
 
 
 class DB(object):
     __metaclass__ = ABCMeta
 
-    def __init__(self, reference, table_name, structure):
+    def __init__(self, reference):
         """
         constructor
         """
         self.connection = None
         self.cursor = None
-        self.table_name = table_name
-        self.structure = structure
         self.reference = reference
         self.create_connection()
 
@@ -37,6 +33,36 @@ class DB(object):
         """
         self.cursor.close()
         self.connection.close()
+
+    @abstractmethod
+    def serialize(self, obj):
+        """
+        the function serializes the object
+        :param obj: the object to serialize
+        :returns: the serialize object
+        """
+        pass
+
+    @abstractmethod
+    def deserialize(self, serialize_obj):
+        """
+        the function deserializes object
+        :param serialize_obj: the object to de serialize
+        :returns: the deserialized object
+        """
+        pass
+
+
+class Table:
+    def __init__(self, connection, cursor, table_name, structure):
+        """
+        constructor
+        """
+        self.connection = connection
+        self.cursor = cursor
+        self.table_name = table_name
+        self.structure = structure
+        self.create_table()
 
     def create_table(self):
         """
@@ -56,25 +82,8 @@ class DB(object):
         """
         self.cursor.execute('insert into '
                             ''+self.table_name+' values ?'
-                                               '', self.serialize(obj))
-
-    @abstractmethod
-    def serialize(self, obj):
-        """
-        the function serializes the object
-        :param obj: the object to serialize
-        :returns: the serialize object
-        """
-        pass
-
-    @abstractmethod
-    def deserialize(self, serialize_obj):
-        """
-        the function deserializes object
-        :param serialize_obj: the object to deserialize
-        :returns: the deserialized object
-        """
-        pass
+                                               '', obj.serialize())
+        self.connection.commit()
 
 
 class BlockChainDB(DB):
@@ -83,32 +92,17 @@ class BlockChainDB(DB):
         constructor
         """
         super(BlockChainDB, self).__init__(
-            References().get_block_chain_reference(),
-            BLOCK_CHAIN_TABLE,
-            BLOCK_STRUCTURE)
-        self.create_table()
+            References().get_block_chain_reference())
+        self.blocks_table = Table(self.connection,
+                                  self.cursor,
+                                  BLOCKS_TABLE_NAME,
+                                  BLOCK_STRUCTURE)
+        self.transactions_table = Table(self.connection,
+                                        self.cursor,
+                                        TRANSACTIONS_TABLE_NAME,
+                                        )
 
-    def deserialize(self, serialize_block):
-        number = serialize_block[0]
-        nonce = serialize_block[1]
-        prev = serialize_block[2]
-        difficulty = serialize_block[3]
-        transactions = serialize_block[4]
-        time_stamp = serialize_block[5]
-        return Block(number,
-                     nonce,
-                     prev,
-                     difficulty,
-                     transactions,
-                     time_stamp)
 
-    def serialize(self, obj):
-        """
-        the function serializes the object
-        :param obj: the object to serialize
-        :returns: the serialize object
-        """
-        pass
 
 
 if __name__ == "__main__":

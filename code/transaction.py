@@ -6,7 +6,17 @@ UN_SPENT_OUTPUTS_TABLE_NAME = 'utxo'
 TRANSACTIONS_TABLE_NAME = 'transactions'
 INPUTS_TABLE_NAME = 'inputs'
 OUTPUTS_TABLE_NAME = 'outputs'
-TRANSACTION_STRUCTURE = '(number integer, nonce integer, prev text, difficulty integer, time_stamp integer, hash text)'
+TRANSACTION_STRUCTURE = '(transaction_id integer, ' \
+                        'block_number integer)'
+# the transaction_number in the input and output
+# serialization refers to the transaction id (hash)
+OUTPUT_STRUCTURE = '(value integer, ' \
+                   'address text, ' \
+                   'transaction_number text)'
+INPUT_STRUCTURE = '(transaction_id text, ' \
+                  'output_index integer, ' \
+                  'proof text, ' \
+                  'transaction_number text)'
 
 
 class Transaction:
@@ -57,7 +67,7 @@ class Transaction:
 
         return transaction_hash
 
-    def serialize(self, transaction_number, block_number):
+    def serialize(self, block_number):
         """
         the function serializes the transaction
         :param block_number: the block number which the
@@ -83,7 +93,6 @@ class Transaction:
         return str(serialized_transaction)
         """
         return '({0},{1})'.format(
-            transaction_number,
             self.transaction_id,
             block_number,)
 

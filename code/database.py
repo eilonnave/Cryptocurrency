@@ -2,9 +2,10 @@
 import sqlite3
 from references import References
 from abc import abstractmethod, ABCMeta
-from block import BLOCK_STRUCTURE, Block, BLOCKS_TABLE_NAME
+from block import BLOCK_STRUCTURE, BLOCKS_TABLE_NAME
 from transaction import *
 from encryption import *
+from blockchain import BlockChain
 
 
 class DB(object):
@@ -35,16 +36,14 @@ class DB(object):
         self.connection.close()
 
     @abstractmethod
-    def serialize(self, obj):
+    def insert(self, obj):
         """
-        the function serializes the object
-        :param obj: the object to serialize
-        :returns: the serialize object
+        the function inserts object to the database
+        :param obj: the object to insert
         """
-        pass
 
     @abstractmethod
-    def deserialize(self, serialize_obj):
+    def deserialize(self):
         """
         the function deserializes object
         :param serialize_obj: the object to de serialize
@@ -75,14 +74,14 @@ class Table:
         self.cursor.execute(query)
         self.connection.commit()
 
-    def insert(self, obj):
+    def insert(self, serialized_obj):
         """
         the function inserts object to the table
-        :param obj: the object to insert
+        :param serialized_obj: the object to insert
         """
         self.cursor.execute('insert into '
                             ''+self.table_name+' values ?'
-                                               '', obj.serialize())
+                                               '', serialized_obj)
         self.connection.commit()
 
 
@@ -100,18 +99,37 @@ class BlockChainDB(DB):
         self.transactions_table = Table(self.connection,
                                         self.cursor,
                                         TRANSACTIONS_TABLE_NAME,
+                                        TRANSACTION_STRUCTURE
                                         )
+        self.inputs_table = Table(self.connection,
+                                  self.cursor,
+                                  INPUTS_TABLE_NAME,
+                                  INPUT_STRUCTURE)
+        self.outputs_table = Table(self.connection,
+                                   self.cursor,
+                                   OUTPUTS_TABLE_NAME,
+                                   OUTPUT_STRUCTURE)
 
+    def insert(self, block):
+        # insert the block
+        self.blocks_table.insert(block.serialize())
 
+        # insert the transactions
+        block_number = block.number
+        for transaction in block.transactions:
+            self.transactions_table.insert(
+                transaction.serialize(block_number))
+            transaction_number = transaction.transaction_id
+            # insert the inputs
+            for transaction_input in transaction.inputs:
+                self.inputs_table.insert(
+                    transaction_input.serialize(transaction_number))
+            # insert the outputs
+            for transaction_output in transaction.outputs:
+                self.outputs_table.insert(
+                    transaction_output.serialize(transaction_number))
 
 
 if __name__ == "__main__":
     encryption_set = EncryptionSet(RSA.generate(2048))
     db = BlockChainDB()
-    i = Input('111', 1, ('1234', encryption_set.public_key))
-    print i.serialize()
-    i = [Input('111', 1, ('1234', encryption_set.public_key))]
-    o = [Output(43, encryption_set.hash(encryption_set.public_key.exportKey()).hexdigest())]
-    t = Transaction(i, o)
-    print vars(t)
-    print eval(t.serialize())

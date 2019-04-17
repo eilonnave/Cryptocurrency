@@ -2,10 +2,13 @@
 import sqlite3
 from references import References
 from abc import abstractmethod, ABCMeta
-from block import BLOCK_STRUCTURE, BLOCKS_TABLE_NAME
+from block import BLOCK_STRUCTURE, \
+    BLOCKS_TABLE_NAME, \
+    Block
 from transaction import *
 from encryption import *
 from blockchain import BlockChain
+EXTRACT_ALL_QUERY = 'select * from '
 
 
 class DB(object):
@@ -41,13 +44,17 @@ class DB(object):
         the function inserts object to the database
         :param obj: the object to insert
         """
+        pass
 
     @abstractmethod
-    def deserialize(self):
+    def extract(self, line_index):
         """
-        the function deserializes object
-        :param serialize_obj: the object to de serialize
-        :returns: the deserialized object
+        the function extracts from the
+        data base the object from the given line
+        index
+        :param line_index: the line index of the
+        object to extract
+        :returns: the extracted object
         """
         pass
 
@@ -129,6 +136,88 @@ class BlockChainDB(DB):
                 self.outputs_table.insert(
                     transaction_output.serialize(transaction_number))
 
+    def extract(self, line_index):
+        query = \
+            EXTRACT_ALL_QUERY\
+            + self.blocks_table.table_name\
+            + ' where number=?'
+        self.cursor.execute(query, line_index)
+        block_list = self.cursor.fetchall()[0]
+
+        block_number = block_list[0]
+        transactions = self.extract_transactions(block_number)
+        block_list.append(transactions)
+
+        return Block.deserialize(block_list)
+
+    def extract_inputs(self, transaction_number):
+        """
+        the function extracts from the database
+        all the inputs matching to the transaction
+        number
+        :param transaction_number: the transaction number
+        that the inputs should be belong to
+        :returns: the list of the inputs
+        """
+        inputs = []
+        query = \
+            EXTRACT_ALL_QUERY\
+            + self.inputs_table.table_name\
+            + 'where transaction_number=?'
+        self.cursor.execute(query, transaction_number)
+        inputs_lists = self.cursor.fetchall()
+        for input_list in inputs_lists:
+            inputs.append(Input.deserialize(input_list))
+        return inputs
+
+    def extract_outputs(self, transaction_number):
+        """
+        the function extracts from the database
+        all the outputs matching to the transaction
+        number
+        :param transaction_number: the transaction number
+        that the outputs should be belong to
+        :returns: the list of the outputs
+        """
+        outputs = []
+        query = \
+            EXTRACT_ALL_QUERY\
+            + self.outputs_table.table_name\
+            + 'where transaction_number=?'
+        self.cursor.execute(query, transaction_number)
+        outputs_lists = self.cursor.fetchall()
+        for output_list in outputs_lists:
+            outputs.append(Output.deserialize(output_list))
+        return outputs
+
+    def extract_transactions(self, block_number):
+        """
+        the function extracts from the database
+        all the transactions matching to the block
+        number
+        :param block_number: the block number
+        that the transactions should be belong to
+        :returns: the list of the transactions
+        """
+        # extract the transactions
+        query = \
+            EXTRACT_ALL_QUERY\
+            + self.transactions_table.table_name\
+            + 'where block_number=?'
+        self.cursor.execute(query, block_number)
+        block_transactions = self.cursor.fetchall()
+
+        # build the transactions using the inputs and
+        # the outputs
+        transactions = []
+        for transaction_list in block_transactions:
+            transaction_number = transaction_list[0]
+            inputs = self.extract_inputs(transaction_number)
+            outputs = self.extract_outputs(transaction_number)
+            transaction_list.append(inputs)
+            transaction_list.append(outputs)
+            transactions.append(Transaction.deserialize(transaction_list))
+        return transactions
 
 if __name__ == "__main__":
     encryption_set = EncryptionSet(RSA.generate(2048))

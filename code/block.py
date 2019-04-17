@@ -9,8 +9,7 @@ BLOCK_STRUCTURE = '(number integer, ' \
                   'nonce integer, ' \
                   'prev text, ' \
                   'difficulty integer, ' \
-                  'time_stamp integer, ' \
-                  'hash text)'
+                  'time_stamp integer)'
 BLOCKS_TABLE_NAME = 'blocks'
 
 
@@ -46,21 +45,19 @@ class Block:
 
     def to_string(self):
         """
-        the function converts the block to a string
+        the function converts the block to a string for
+        the hash function
         :returns: the block's string
         """
         block_string = str(
             self.number)+str(
                 self.nonce)+self.prev+str(
-                    self.difficulty)+self.hash_transactions()+str(
-                        self.time_stamp)
+                    self.difficulty)+self.hash_transactions()
         return block_string
 
     def hash_block(self):
         """
         the function hashes the block data
-        :returns: the hash value of the
-        block's properties
         """
         self.hash_code = hashlib.sha256(
             self.to_string().encode(
@@ -97,6 +94,7 @@ class Block:
         while not self.is_valid_proof():
             self.nonce += 1
             self.hash_block()
+        self.time_stamp = time.time()
 
     def is_valid_proof(self):
         """
@@ -111,13 +109,32 @@ class Block:
         the function serializes the block
         :returns: the serialized block
         """
-        return '({0},{1},{2},{3},{4},{5})'.format(
+        return '({0},{1},{2},{3},{4})'.format(
             self.number,
             self.nonce,
             self.prev,
             self.difficulty,
-            self.time_stamp,
-            self.hash_code)
+            self.time_stamp)
+
+    @classmethod
+    def deserialize(cls, block_list):
+        """
+        the function deserializes the block
+        from the given list
+        :param block_list: the serialized block in a list
+        """
+        number = block_list[0]
+        nonce = block_list[1]
+        prev = block_list[2]
+        difficulty = block_list[3]
+        time_stamp = block_list[4]
+        transactions = block_list[5]
+        return cls(number,
+                   nonce,
+                   prev,
+                   difficulty,
+                   transactions,
+                   time_stamp)
 
 
 if __name__ == "__main__":

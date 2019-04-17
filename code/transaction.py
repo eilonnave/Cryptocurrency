@@ -74,27 +74,20 @@ class Transaction:
         transaction belongs to
         :returns: the serialized transaction
         """
-        """
-        # serializes the inputs
-        serialized_inputs = '['
-        for transaction_input in self.inputs:
-            serialized_inputs += transaction_input.serialize()+', '
-        serialized_inputs = serialized_inputs[:-2]+']'
-
-        # serializes the outputs
-        serialized_outputs = '['
-        for transaction_output in self.outputs:
-            serialized_outputs += transaction_output.serialize()+', '
-        serialized_outputs = serialized_outputs[:-2]+']'
-
-        serialized_transaction = {'inputs': serialized_inputs,
-                                  'outputs': serialized_outputs,
-                                  'transaction_id': self.transaction_id}
-        return str(serialized_transaction)
-        """
         return '({0},{1})'.format(
             self.transaction_id,
-            block_number,)
+            block_number)
+
+    @classmethod
+    def deserialize(cls, transaction_list):
+        """
+        the function deserializes the transaction
+        from the given list
+        :param transaction_list: the serialized transaction in a list
+        """
+        inputs = transaction_list[2]
+        outputs = transaction_list[3]
+        return cls(inputs, outputs)
 
 
 class Output:
@@ -130,14 +123,21 @@ class Output:
         output belongs to
         :returns: the serialized output
         """
-        """
-        return str({'value': str(self.value),
-                    'address': self.address})
-        """
         return '({0},{1},{2})'.format(
             self.value,
             self.address,
             transaction_number)
+
+    @classmethod
+    def deserialize(cls, output_list):
+        """
+        the function deserializes the output
+        from the given list
+        :param output_list: the serialized output in a list
+        """
+        value = output_list[0]
+        address = output_list[1]
+        return cls(value, address)
 
 
 class Input:
@@ -179,18 +179,23 @@ class Input:
         input belongs to
         :returns: the serialized input
         """
-        """
-        return str({'transaction_id': self.transaction_id,
-                    'output_index': str(self.output_index),
-                    'proof': '('+str(self.proof[0])
-                                + ', ' +
-                             self.proof[1].exportKey()+')'})
-                             """
         return '({0},{1},{2},{3})'.format(
             self.transaction_id,
             self.output_index,
             str(self.proof),
             transaction_number)
+
+    @classmethod
+    def deserialize(cls, input_list):
+        """
+        the function deserializes the input
+        from the given list
+        :param input_list: the serialized input in a list
+        """
+        transaction_id = input_list[0]
+        output_index = input_list[1]
+        proof = eval(input_list[2])
+        return cls(transaction_id, output_index, proof)
 
 
 class UnspentOutput:

@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 from block import Block
 from transaction import Transaction, Input, Output
+
+
 BLOCK_HASH_SIZE = 256
 REWORD = 50
 
 
-class BlockChain:
-    def __init__(self, chain, logger):
+class BlockChain(object):
+    def __init__(self, chain, logger, **kwargs):
         """
         constructor
         """
@@ -38,11 +40,6 @@ class BlockChain:
 
         # transaction that rewards the miner
         transaction_input = Input(str(len(self.chain)), -1, miner_address)
-        """
-        for checking that the block is legit, I must add
-        checking that in the input the implementation of
-        the chain's length is right
-        """
         transaction_output = Output(REWORD, miner_address)
         new_transaction = Transaction([transaction_input],
                                       [transaction_output])

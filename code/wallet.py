@@ -68,9 +68,6 @@ class Wallet(EncryptionSet):
                         if transaction_input.output_index == output_index:
                             return False
         return True
-        """
-        need to be done by unspent transactions data base
-        """
 
     def update_balance(self):
         """

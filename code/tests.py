@@ -8,10 +8,12 @@ from database import BlockChainDB
 
 def test1():
     """
-    tests wallets without p2p network and data base
+    tests wallets without p2p network,
+    the test is using common database
+    for all wallets
     """
     logger = Logger('test1')
-    block_chain = BlockChain.new_block_chain(logger)
+    block_chain = BlockChainDB(logger)
 
     # creates two wallets in the system
     wallet1 = Wallet.new_wallet(block_chain, logger)
@@ -60,15 +62,6 @@ def test1():
     assert not wallet2.create_transaction(second_balance, wallet1.address)
 
     logger.info('finish successful test 1')
-
-
-def test2():
-    """
-    tests wallets with database without p2p
-    network
-    """
-    logger = Logger('test2')
-
 
 
 if __name__ == '__main__':

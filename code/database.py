@@ -20,11 +20,12 @@ class DB(object):
         """
         constructor
         """
+        print '1'
+        self.logger = logger
         self.connection = None
         self.cursor = None
         self.reference = reference
         self.create_connection()
-        self.logger = logger
 
     def create_connection(self):
         """
@@ -115,7 +116,7 @@ class BlockChainDB(DB, BlockChain):
         super(BlockChainDB, self).__init__(
             reference=References().get_block_chain_reference(),
             logger=logger,
-            chain=self.extract_all())
+            chain=[])
         self.blocks_table = Table(self.connection,
                                   self.cursor,
                                   BLOCKS_TABLE_NAME,
@@ -133,6 +134,7 @@ class BlockChainDB(DB, BlockChain):
                                    self.cursor,
                                    OUTPUTS_TABLE_NAME,
                                    OUTPUT_STRUCTURE)
+        self.update_chain()
 
     def insert(self, block):
         # insert the block
@@ -160,7 +162,7 @@ class BlockChainDB(DB, BlockChain):
             + self.blocks_table.table_name\
             + ' where number=?'
         self.cursor.execute(query, line_index)
-        block_list = self.cursor.fetchone()
+        block_list = self.cursor.fetchone()[0]
 
         block_number = block_list[0]
         transactions = self.extract_transactions(block_number)
@@ -242,7 +244,7 @@ class BlockChainDB(DB, BlockChain):
         # get the blocks table length
         query = 'select count(*) from '+self.blocks_table.table_name
         self.cursor.execute(query)
-        count = self.cursor.fetchone()
+        count = self.cursor.fetchone()[0]
 
         chain = []
         for i in xrange(count):
@@ -258,3 +260,10 @@ class BlockChainDB(DB, BlockChain):
         self.add_new_block(miner_address)
         new_block = self.chain[-1]
         self.insert(new_block)
+
+    def update_chain(self):
+        """
+        the function updates the chain using the data
+        base
+        """
+        self.chain = self.extract_all()

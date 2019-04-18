@@ -6,7 +6,7 @@ from transaction import Transaction, Input, Output, UnspentOutput
 
 
 class Wallet(EncryptionSet):
-    def __init__(self, private_key, block_chain, logger):
+    def __init__(self, private_key, block_chain_db, logger):
         """
         constructor
         """
@@ -15,7 +15,7 @@ class Wallet(EncryptionSet):
             SHA256.new(
                 self.public_key.exportKey()).
             hexdigest()).hexdigest()
-        self.block_chain = block_chain
+        self.block_chain_db = block_chain_db
         self.unspent_outputs = []
         self.update_unspent_outputs()
         self.balance = 0
@@ -60,7 +60,7 @@ class Wallet(EncryptionSet):
         """
         # go throw all the inputs in the block chain
         # and checks weather they use the output
-        for block in self.block_chain.chain:
+        for block in self.block_chain_db.chain:
             for transaction in block.transactions:
                 for transaction_input in transaction.inputs:
                     if transaction_input.transaction_id == \
@@ -98,7 +98,7 @@ class Wallet(EncryptionSet):
         unspent_outputs = []
 
         # go throw all the outputs in the block chain
-        for block in self.block_chain.chain:
+        for block in self.block_chain_db.chain:
             for transaction in block.transactions:
                 output_index = 0
                 for transaction_output in transaction.outputs:
@@ -174,4 +174,4 @@ class Wallet(EncryptionSet):
         to the nodes
         :param transaction: the transaction to distribute
         """
-        self.block_chain.add_transaction(transaction)
+        self.block_chain_db.add_transaction(transaction)

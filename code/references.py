@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 import pickle
+
+
 REFERENCES_FILE = 'references.pickle'
 DEFAULT_DB_DIR = 'c:'
 DEFAULT_BCK_REFERENCE = 'bck.db'

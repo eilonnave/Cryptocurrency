@@ -8,20 +8,13 @@ REWORD = 50
 
 
 class BlockChain(object):
-    def __init__(self, chain, logger, **kwargs):
+    def __init__(self, chain, logger):
         """
         constructor
         """
         self.chain = chain
         self.transactions_pool = []
         self.logger = logger
-
-    @classmethod
-    def new_block_chain(cls, logger):
-        """
-        factory method
-        """
-        return cls([], logger)
 
     def add_new_block(self, miner_address):
         """
@@ -39,7 +32,8 @@ class BlockChain(object):
             prev = self.chain[-1].hash_code
 
         # transaction that rewards the miner
-        transaction_input = Input(str(len(self.chain)), -1, miner_address)
+        # the input proof is arbitrary
+        transaction_input = Input(str(len(self.chain)), -1, (miner_address, ''))
         transaction_output = Output(REWORD, miner_address)
         new_transaction = Transaction([transaction_input],
                                       [transaction_output])
@@ -53,7 +47,7 @@ class BlockChain(object):
         # set the block chain
         self.chain.append(block)
         self.transactions_pool = []
-        self.logger.info('The new bock was added to the block chain')
+        self.logger.info('The new block was added to the block chain')
 
     def add_transaction(self, transaction):
         """

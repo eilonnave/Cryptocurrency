@@ -13,18 +13,19 @@ def test1():
     for all wallets
     """
     logger = Logger('test1')
-    block_chain = BlockChainDB(logger)
+    logger.info('Test 1 starts')
+    block_chain_db = BlockChainDB(logger)
 
     # creates two wallets in the system
-    wallet1 = Wallet.new_wallet(block_chain, logger)
-    wallet2 = Wallet.new_wallet(block_chain, logger)
+    wallet1 = Wallet.new_wallet(block_chain_db, logger)
+    wallet2 = Wallet.new_wallet(block_chain_db, logger)
 
     # check that their initial value is 0
     assert wallet1.balance == 0
     assert wallet2.balance == 0
 
     # creates the miner in the system
-    wallet3 = Wallet.new_wallet(block_chain, logger)
+    wallet3 = Wallet.new_wallet(block_chain_db, logger)
     miner = Miner(wallet3)
 
     # mine the genesis block and check the miner balance
@@ -61,7 +62,9 @@ def test1():
     assert wallet2.get_balance() == second_balance - 1
     assert not wallet2.create_transaction(second_balance, wallet1.address)
 
-    logger.info('finish successful test 1')
+    logger.info('Finish successfully test 1')
+    print block_chain_db.extract_chain()
+    block_chain_db.close_connection()
 
 
 if __name__ == '__main__':

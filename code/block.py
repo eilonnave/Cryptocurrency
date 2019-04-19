@@ -109,26 +109,23 @@ class Block:
         the function serializes the block
         :returns: the serialized block
         """
-        return '({0},{1},{2},{3},{4})'.format(
-            self.number,
-            self.nonce,
-            self.prev,
-            self.difficulty,
-            self.time_stamp)
+        return self.number, self.nonce, self.prev, self.difficulty, self.time_stamp
 
     @classmethod
-    def deserialize(cls, block_list):
+    def deserialize(cls, serialized_block, transactions):
         """
         the function deserializes the block
-        from the given list
-        :param block_list: the serialized block in a list
+        from the serialized block and the transactions
+        :param serialized_block: the serialized block
+        :param transactions: the block's transactions
+        :returns: the deserialized block
         """
-        number = block_list[0]
-        nonce = block_list[1]
-        prev = block_list[2]
-        difficulty = block_list[3]
-        time_stamp = block_list[4]
-        transactions = block_list[5]
+        number = serialized_block[0]
+        nonce = serialized_block[1]
+        prev = serialized_block[2]
+        difficulty = serialized_block[3]
+        time_stamp = serialized_block[4]
+        transactions = transactions
         return cls(number,
                    nonce,
                    prev,

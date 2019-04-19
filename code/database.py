@@ -101,21 +101,26 @@ class Table:
         the function inserts object to the table
         :param serialized_obj: the object to insert
         """
-        self.cursor.execute('insert into '
-                            ''+self.table_name+' values ?'
-                                               '', serialized_obj)
+        # building the query
+        length = len(serialized_obj)
+        query = \
+            'insert into '\
+            + self.table_name\
+            + ' values ('\
+            + ('?, '*(length-1))+'?)'
+        self.cursor.execute(query, serialized_obj)
         self.connection.commit()
 
 
 class BlockChainDB(BlockChain):
-    def __init__(self, reference, logger):
+    def __init__(self, logger):
         """
         constructor
         """
         self.logger = logger
         self.connection = None
         self.cursor = None
-        self.reference = reference
+        self.reference = References().get_block_chain_reference()
         self.create_connection()
         self.blocks_table = Table(self.connection,
                                   self.cursor,
@@ -134,7 +139,8 @@ class BlockChainDB(BlockChain):
                                    self.cursor,
                                    OUTPUTS_TABLE_NAME,
                                    OUTPUT_STRUCTURE)
-        self.update_chain()
+        chain = self.extract_chain()
+        super(BlockChainDB, self).__init__(chain, logger)
 
     def create_connection(self):
         """
@@ -175,7 +181,7 @@ class BlockChainDB(BlockChain):
             for transaction_output in transaction.outputs:
                 self.outputs_table.insert(
                     transaction_output.serialize(transaction_number))
-        self.logger.info('new block is inserted to the data base')
+        self.logger.info('The new block was inserted to the data base')
 
     def extract_block(self, line_index):
         """
@@ -190,15 +196,11 @@ class BlockChainDB(BlockChain):
             EXTRACT_ALL_QUERY\
             + self.blocks_table.table_name\
             + ' where number=?'
-        self.cursor.execute(query, line_index)
-        block_list = self.cursor.fetchone()[0]
-
-        block_number = block_list[0]
-        transactions = self.extract_transactions(block_number)
-        block_list.append(transactions)
-
-        self.logger.info('block number '+line_index+'extracted for the db')
-        return Block.deserialize(block_list)
+        self.cursor.execute(query, (line_index,))
+        serialized_block = self.cursor.fetchone()
+        transactions = self.extract_transactions(line_index)
+        self.logger.info('Block number '+str(line_index)+' extracted for the db')
+        return Block.deserialize(serialized_block, transactions)
 
     def extract_inputs(self, transaction_number):
         """
@@ -213,11 +215,11 @@ class BlockChainDB(BlockChain):
         query = \
             EXTRACT_ALL_QUERY\
             + self.inputs_table.table_name\
-            + 'where transaction_number=?'
-        self.cursor.execute(query, transaction_number)
-        inputs_lists = self.cursor.fetchall()
-        for input_list in inputs_lists:
-            inputs.append(Input.deserialize(input_list))
+            + ' where transaction_number=?'
+        self.cursor.execute(query, (transaction_number,))
+        serialized_inputs = self.cursor.fetchall()
+        for serialized_input in serialized_inputs:
+            inputs.append(Input.deserialize(serialized_input))
         return inputs
 
     def extract_outputs(self, transaction_number):
@@ -233,11 +235,11 @@ class BlockChainDB(BlockChain):
         query = \
             EXTRACT_ALL_QUERY\
             + self.outputs_table.table_name\
-            + 'where transaction_number=?'
-        self.cursor.execute(query, transaction_number)
-        outputs_lists = self.cursor.fetchall()
-        for output_list in outputs_lists:
-            outputs.append(Output.deserialize(output_list))
+            + ' where transaction_number=?'
+        self.cursor.execute(query, (transaction_number,))
+        serialized_outputs = self.cursor.fetchall()
+        for serialized_output in serialized_outputs:
+            outputs.append(Output.deserialize(serialized_output))
         return outputs
 
     def extract_transactions(self, block_number):
@@ -253,20 +255,18 @@ class BlockChainDB(BlockChain):
         query = \
             EXTRACT_ALL_QUERY\
             + self.transactions_table.table_name\
-            + 'where block_number=?'
-        self.cursor.execute(query, block_number)
+            + ' where block_number =?'
+        self.cursor.execute(query, (block_number,))
         block_transactions = self.cursor.fetchall()
 
         # build the transactions using the inputs and
         # the outputs
         transactions = []
-        for transaction_list in block_transactions:
-            transaction_number = transaction_list[0]
+        for serialized_transaction in block_transactions:
+            transaction_number = serialized_transaction[0]
             inputs = self.extract_inputs(transaction_number)
             outputs = self.extract_outputs(transaction_number)
-            transaction_list.append(inputs)
-            transaction_list.append(outputs)
-            transactions.append(Transaction.deserialize(transaction_list))
+            transactions.append(Transaction.deserialize(inputs, outputs))
         return transactions
 
     def extract_chain(self):
@@ -294,11 +294,11 @@ class BlockChainDB(BlockChain):
         """
         self.add_new_block(miner_address)
         new_block = self.chain[-1]
-        self.insert(new_block)
+        self.insert_block(new_block)
 
     def update_chain(self):
         """
         the function updates the chain using the data
         base
         """
-        self.chain = self.extract_all()
+        self.chain = self.extract_chain()

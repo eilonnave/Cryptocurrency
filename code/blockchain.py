@@ -12,7 +12,6 @@ class BlockChain(object):
         """
         constructor
         """
-        print '2'
         self.chain = chain
         self.transactions_pool = []
         self.logger = logger

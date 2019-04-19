@@ -20,7 +20,6 @@ class DB(object):
         """
         constructor
         """
-        print '1'
         self.logger = logger
         self.connection = None
         self.cursor = None
@@ -108,15 +107,16 @@ class Table:
         self.connection.commit()
 
 
-class BlockChainDB(DB, BlockChain):
-    def __init__(self, logger):
+class BlockChainDB(BlockChain):
+    def __init__(self, reference, logger):
         """
         constructor
         """
-        super(BlockChainDB, self).__init__(
-            reference=References().get_block_chain_reference(),
-            logger=logger,
-            chain=[])
+        self.logger = logger
+        self.connection = None
+        self.cursor = None
+        self.reference = reference
+        self.create_connection()
         self.blocks_table = Table(self.connection,
                                   self.cursor,
                                   BLOCKS_TABLE_NAME,
@@ -136,7 +136,28 @@ class BlockChainDB(DB, BlockChain):
                                    OUTPUT_STRUCTURE)
         self.update_chain()
 
-    def insert(self, block):
+    def create_connection(self):
+        """
+        creates new connection to the data
+        base
+        """
+        self.connection = sqlite3.connect(self.reference)
+        self.cursor = self.connection.cursor()
+        self.logger.info('connected to db- '+self.reference)
+
+    def close_connection(self):
+        """
+        closes the connection and the cursor
+        """
+        self.cursor.close()
+        self.connection.close()
+        self.logger.info('connection is closed with db- '+self.reference)
+
+    def insert_block(self, block):
+        """
+        the function inserts block to the database
+        :param block: the block to insert
+        """
         # insert the block
         self.blocks_table.insert(block.serialize())
 
@@ -156,7 +177,15 @@ class BlockChainDB(DB, BlockChain):
                     transaction_output.serialize(transaction_number))
         self.logger.info('new block is inserted to the data base')
 
-    def extract(self, line_index):
+    def extract_block(self, line_index):
+        """
+        the function extracts from the
+        data base the block from the given line
+        index
+        :param line_index: the line index of the
+        block extract
+        :returns: the extracted block
+        """
         query = \
             EXTRACT_ALL_QUERY\
             + self.blocks_table.table_name\
@@ -240,7 +269,13 @@ class BlockChainDB(DB, BlockChain):
             transactions.append(Transaction.deserialize(transaction_list))
         return transactions
 
-    def extract_all(self):
+    def extract_chain(self):
+        """
+        the function extracts from the
+        data base list of the all blocks
+        inside
+        :returns: list of the extracted blocks
+        """
         # get the blocks table length
         query = 'select count(*) from '+self.blocks_table.table_name
         self.cursor.execute(query)
@@ -248,7 +283,7 @@ class BlockChainDB(DB, BlockChain):
 
         chain = []
         for i in xrange(count):
-            chain.append(self.extract(i))
+            chain.append(self.extract_block(i))
         return chain
 
     def add_new_block_to_db(self, miner_address):

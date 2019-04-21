@@ -5,7 +5,7 @@ import pickle
 
 REFERENCES_FILE = 'references.pickle'
 DEFAULT_DB_DIR = 'c:'
-DEFAULT_BCK_REFERENCE = 'bck.db'
+DEFAULT_BCK_REFERENCE = 'c://bck.db'
 SECONDARY_BCK_REFERENCE = '.bck.db'
 BLOCK_CHAIN_KEY = 'bck'
 DEFAULT_UTXO_REFERENCE = 'utxo.db'
@@ -38,6 +38,7 @@ class References:
             self.dict[BLOCK_CHAIN_KEY] = SECONDARY_BCK_REFERENCE
             self.dict[UNSPENT_OUTPUTS_KEY] = SECONDARY_UTXO_REFERENCE
         # dump the dict to the file
+        print self.dict
         with open(REFERENCES_FILE, 'wb') as handle:
             pickle.dump(self.dict, handle,
                         protocol=pickle.HIGHEST_PROTOCOL)

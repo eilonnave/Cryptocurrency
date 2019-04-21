@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from wallet import Wallet
-from blockchain import BlockChain
 from miner import Miner
 from logger import Logger
 from database import BlockChainDB
@@ -63,7 +62,6 @@ def test1():
     assert not wallet2.create_transaction(second_balance, wallet1.address)
 
     logger.info('Finish successfully test 1')
-    print block_chain_db.extract_chain()
     block_chain_db.close_connection()
 
 

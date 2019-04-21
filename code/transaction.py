@@ -190,9 +190,9 @@ class Input:
         :param serialized_input: the serialized input
         :returns: the deserialized input
         """
-        transaction_id = serialized_input[0]
+        transaction_id = str(serialized_input[0])
         output_index = serialized_input[1]
-        proof = tuple(serialized_input[2])
+        proof = serialized_input[2]
         return cls(transaction_id, output_index, proof)
 
 

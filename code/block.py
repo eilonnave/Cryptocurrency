@@ -4,7 +4,7 @@ import time
 
 
 STARTER_NONCE = 0
-DIFFICULTY = 4
+DIFFICULTY = 1
 BLOCK_STRUCTURE = '(number integer, ' \
                   'nonce integer, ' \
                   'prev text, ' \
@@ -122,7 +122,7 @@ class Block:
         """
         number = serialized_block[0]
         nonce = serialized_block[1]
-        prev = serialized_block[2]
+        prev = str(serialized_block[2])
         difficulty = serialized_block[3]
         time_stamp = serialized_block[4]
         transactions = transactions

@@ -148,6 +148,7 @@ class BlockChainDB(BlockChain):
         base
         """
         self.connection = sqlite3.connect(self.reference)
+        self.connection.text_factory = bytes
         self.cursor = self.connection.cursor()
         self.logger.info('connected to db- '+self.reference)
 
